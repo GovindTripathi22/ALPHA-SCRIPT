@@ -13,31 +13,32 @@ import useStore from '../lib/store';
 const SystemTelemetryChart = () => {
     const { nodes } = useStore((state) => state.networkData);
 
-    // Generate some simulated historical data based on current node pressure averages
-    const data = useMemo(() => {
-        if (!nodes || nodes.length === 0) return [];
+    const [chartData, setChartData] = React.useState([]);
+
+    React.useEffect(() => {
+        if (!nodes || nodes.length === 0) return;
 
         const avgPressure = nodes.reduce((acc, n) => acc + (n.pressure || 100), 0) / nodes.length;
         const avgFlow = nodes.reduce((acc, n) => acc + (n.flow_rate || 50), 0) / nodes.length;
 
-        // Create a rolling window of 20 data points
-        const points = [];
-        let currentPressure = avgPressure;
-        let currentFlow = avgFlow;
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
 
-        for (let i = 20; i >= 0; i--) {
-            // Add some jitter
-            currentPressure += (Math.random() - 0.5) * 5;
-            currentFlow += (Math.random() - 0.5) * 2;
+        const newPoint = {
+            time: timeStr,
+            pressure: Math.max(0, avgPressure + (Math.random() - 0.5) * 2), // Small jitter based on real live average
+            flow: Math.max(0, avgFlow + (Math.random() - 0.5) * 1)
+        };
 
-            points.push({
-                time: `T-${i}s`,
-                pressure: Math.max(0, currentPressure),
-                flow: Math.max(0, currentFlow),
-            });
-        }
+        setChartData(prevData => {
+            const newData = [...prevData, newPoint];
+            // keep max 20 data points
+            if (newData.length > 20) {
+                return newData.slice(newData.length - 20);
+            }
+            return newData;
+        });
 
-        return points;
     }, [nodes]);
 
     return (
@@ -62,7 +63,7 @@ const SystemTelemetryChart = () => {
             <div className="flex-1 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
-                        data={data}
+                        data={chartData}
                         margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
                         <defs>

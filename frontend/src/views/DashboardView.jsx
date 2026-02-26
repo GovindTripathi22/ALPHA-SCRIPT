@@ -12,7 +12,6 @@ const DashboardView = () => {
         <div className="flex-1 h-full flex flex-col gap-6 overflow-hidden">
             {/* Top Row: Network Visualizer & Stats */}
             <div className="flex gap-6 h-2/3">
-                {/* Telemetry Window */}
                 <DesktopWindow
                     title="Global_Telemetry_Matrix.exe"
                     headerRight={
@@ -24,7 +23,9 @@ const DashboardView = () => {
                     flex={2}
                 >
                     <div className="relative flex-1 bg-black/20">
-                        <SystemTelemetryChart />
+                        <div className="absolute inset-0">
+                            <SystemTelemetryChart />
+                        </div>
                     </div>
                 </DesktopWindow>
 
