@@ -10,6 +10,21 @@ import { Cpu, Globe, Terminal as TerminalIcon } from 'lucide-react';
 const DashboardView = () => {
     return (
         <div className="flex-1 h-full flex flex-col gap-6 overflow-hidden">
+            {/* Action Bar */}
+            <div className="flex justify-end shrink-0">
+                <button
+                    onClick={() => {
+                        fetch('http://localhost:5000/api/trigger-anomaly', { method: 'POST' }).catch(console.error);
+                        // Also manually trigger the store if backend isn't deeply connected for this demo path:
+                        fetch('http://localhost:5000/api/agent/dispatch').catch(console.error);
+                    }}
+                    className="bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-[0.2em] px-6 py-3 rounded shadow-[0_0_20px_rgba(220,38,38,0.4)] border border-red-500 transition-all flex items-center gap-2 group"
+                >
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                    Trigger Torricelli Pipe Leak
+                </button>
+            </div>
+
             {/* Top Row: Network Visualizer & Stats */}
             <div className="flex gap-6 h-2/3">
                 <DesktopWindow

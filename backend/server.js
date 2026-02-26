@@ -43,6 +43,28 @@ simulator.on('update', (state) => {
 // -------------------------------------------------------------------------- //
 
 /**
+ * Force Trigger Anomaly Endpoint
+ */
+app.post('/api/trigger-anomaly', (req, res) => {
+    // Force the simulator to generate a specific critical anomaly
+    simulator.currentState.nodes = simulator.currentState.nodes.map((n, i) => {
+        if (i === 1) { // Force a massive leak on node 1
+            return {
+                ...n,
+                status: 'critical',
+                integrity_score: 12,
+                flow_rate: n.flow_rate + 24.2,
+                pressure: n.pressure - 18
+            };
+        }
+        return n;
+    });
+    simulator.currentState.systemState = 'ANOMALOUS';
+    simulator.emit('update', simulator.currentState);
+    res.json({ success: true, message: 'Anomaly Triggered Manually' });
+});
+
+/**
  * Health Check
  */
 app.get('/api/health', (req, res) => {
