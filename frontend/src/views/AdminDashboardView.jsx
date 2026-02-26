@@ -281,13 +281,13 @@ const AdminDashboardView = () => {
 
                     {/* Torricelli AI Hole Size Engine - Always Visible! */}
                     <DesktopWindow
-                        title="Torricelli_Physics_Engine.exe"
+                        title="PREDICTIVE_LEAK_IDENTIFICATION"
                         headerRight={<Terminal size={14} className="text-cyan-400 animate-pulse" />}
                         flex={1}
                         className="border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.05)]"
                     >
                         <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/80 p-5 font-mono">
-                            <h3 className="text-cyan-400 text-sm font-bold border-b border-cyan-500/20 pb-2 mb-4">root@hydrograph-core:~# process_torricelli_telemetry --live</h3>
+                            <h3 className="text-cyan-400 text-sm font-bold border-b border-cyan-500/20 pb-2 mb-4">root@hydrograph-core:~# process_torricelli_math_engine --live</h3>
                             <div className="space-y-3 text-xs">
                                 {issueNodes.length > 0 ? (
                                     <>
