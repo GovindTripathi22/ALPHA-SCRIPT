@@ -9,7 +9,8 @@ import {
     Clock,
     Navigation2,
     AlertCircle,
-    TrendingDown
+    TrendingDown,
+    ActivitySquare
 } from 'lucide-react';
 import useStore from '../lib/store';
 import DesktopWindow from '../components/DesktopWindow';
@@ -40,6 +41,19 @@ const AdminDashboardView = () => {
                 lng: NAGPUR_NODES[node.id]?.lng || 79.0882
             }))
             .sort((a, b) => b.integrity_score - a.integrity_score);
+    }, [nodes]);
+
+    const healthNodes = useMemo(() => {
+        // Simulate physical pipe age based on Node ID hash
+        return (nodes || []).map((node, i) => {
+            const simulatedAge = 5 + (i * 3.4) % 15; // Range ~5 to 20 years
+            return {
+                ...node,
+                pipeAgeYears: simulatedAge.toFixed(1),
+                needsRepair: simulatedAge > 12,
+                repairScheduled: false
+            };
+        }).sort((a, b) => b.pipeAgeYears - a.pipeAgeYears);
     }, [nodes]);
 
     const avgSecurityScore = useMemo(() => {
@@ -150,6 +164,12 @@ const AdminDashboardView = () => {
                                 >
                                     Telemetry Logs
                                 </button>
+                                <button
+                                    onClick={() => setActiveTab('health')}
+                                    className={`flex-1 py-3 text-[10px] uppercase font-black tracking-[0.2em] transition-all ${activeTab === 'health' ? 'text-green-500 border-b border-green-500 bg-green-500/5' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
+                                >
+                                    System Health
+                                </button>
                             </div>
 
                             <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
@@ -190,7 +210,7 @@ const AdminDashboardView = () => {
                                             ))
                                         )}
                                     </div>
-                                ) : (
+                                ) : activeTab === 'comms' ? (
                                     <div className="space-y-2 font-mono text-[10px] text-slate-500">
                                         <p className="text-primary/60 border-b border-primary/10 pb-1">[SYSTEM] Initializing GNN weight verification...</p>
                                         <p>... checking edge weights for Grid_Segment_A1</p>
@@ -200,6 +220,51 @@ const AdminDashboardView = () => {
                                         <p className="text-blue-400">... Result: Prediction ID #4910: Burst Likelihood increased by 12% in Sector 4.</p>
                                         <p>... Dispatching command CMD_01 to local gateway.</p>
                                         <div className="w-2 h-4 bg-primary/40 animate-pulse mt-4"></div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2 mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded">
+                                            <AlertCircle size={16} className="text-red-500" />
+                                            <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">Action Required: Infrastructure exceeding 12-year lifespan.</p>
+                                        </div>
+                                        {healthNodes.map((node, i) => (
+                                            <div key={i} className={`group p-4 rounded border transition-all hover:bg-white/5 shadow-lg ${node.needsRepair && !node.repairScheduled ? 'bg-red-500/5 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <h4 className="text-xs font-bold text-white font-mono flex items-center gap-2">
+                                                            <ActivitySquare size={14} className={node.needsRepair && !node.repairScheduled ? 'text-red-500' : 'text-green-500'} />
+                                                            {node.id} Physical Assessment
+                                                        </h4>
+                                                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Material: DUCTILE IRON_200mm</p>
+                                                    </div>
+                                                    <div className="flex flex-col items-end">
+                                                        <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-widest ${node.needsRepair && !node.repairScheduled ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-700 text-slate-300'}`}>
+                                                            {node.needsRepair && !node.repairScheduled ? 'CRITICAL AGE' : 'NOMINAL'}
+                                                        </span>
+                                                        <span className={`text-[11px] font-bold mt-1 font-mono ${node.needsRepair && !node.repairScheduled ? 'text-red-400' : 'text-green-400'}`}>
+                                                            {node.pipeAgeYears} YRS
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {node.needsRepair && !node.repairScheduled && (
+                                                    <div className="mt-4 pt-3 border-t border-red-500/20">
+                                                        <p className="text-[10px] text-slate-400 mb-3 font-mono">WARNING: Structural failure probability 87.4% due to material fatigue.</p>
+                                                        <button
+                                                            className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-red-600/20"
+                                                            onClick={(e) => {
+                                                                const el = e.currentTarget;
+                                                                el.innerText = 'MAINTENANCE DISPATCHED (48H)';
+                                                                el.className = 'w-full py-2 bg-green-600 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-green-600/20 cursor-not-allowed';
+                                                                el.disabled = true;
+                                                            }}
+                                                        >
+                                                            SCHEDULE REPAIR FIELD TEAM
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>
