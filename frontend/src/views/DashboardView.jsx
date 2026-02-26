@@ -11,28 +11,35 @@ const DashboardView = () => {
     const { networkData, setNetworkData } = useStore();
 
     const triggerManualAnomaly = () => {
-        // Try the backend first for local dev
-        fetch('http://localhost:5000/api/trigger-anomaly', { method: 'POST' }).catch(() => {
-            // Fallback: If backend is dead (e.g. Vercel deployment), force it client-side!
-            if (!networkData.nodes || networkData.nodes.length === 0) return;
-            const updatedNodes = networkData.nodes.map((n, i) => {
-                // Force a massive leak on a random node (or index 1 to be consistent)
-                if (i === 1) {
-                    return {
-                        ...n,
-                        status: 'critical',
-                        integrity_score: 12,
-                        flow_rate: (n.flow_rate || 50) + 24.2,
-                        pressure: (n.pressure || 45) - 18
-                    };
-                }
-                return n;
-            });
-            setNetworkData({ ...networkData, nodes: updatedNodes, systemState: 'ANOMALOUS' });
+        // Force the leak client-side immediately for guaranteed functionality
+        if (!networkData.nodes || networkData.nodes.length === 0) {
+            // If nodes aren't loaded yet, try a brief wait or just return
+            console.warn("No nodes found in store to trigger leak.");
+            return;
+        }
+
+        const updatedNodes = networkData.nodes.map((n, i) => {
+            // Force a massive leak on Node 1 (central Nagpur node)
+            if (n.id === 'N1' || i === 1) {
+                return {
+                    ...n,
+                    status: 'critical',
+                    integrity_score: 12,
+                    flow_rate: 84.2, // Simulated high flow
+                    pressure: 27.0   // Simulated low pressure
+                };
+            }
+            return n;
         });
 
-        // Also manually trigger the dispatch report
-        fetch('http://localhost:5000/api/agent/dispatch').catch(console.error);
+        setNetworkData({
+            ...networkData,
+            nodes: updatedNodes,
+            systemState: 'ANOMALOUS'
+        });
+
+        // Try the backend in background if it exists
+        fetch('http://localhost:5000/api/trigger-anomaly', { method: 'POST' }).catch(() => { });
     };
 
     return (
