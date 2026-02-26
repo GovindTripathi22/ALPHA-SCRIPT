@@ -1,7 +1,0 @@
-{
-    "name": "alpha-script-root",
-    "private": true,
-    "scripts": {
-        "vercel-build": "cd frontend && npm install && npm run build && cd .. && rm -rf public dist && cp -r frontend/dist public && cp -r frontend/dist dist"
-    }
-}
