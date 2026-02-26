@@ -1,0 +1,121 @@
+import React, { useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import useStore from '../lib/store';
+import 'leaflet/dist/leaflet.css';
+
+// Hardcoded coordinates for 10 intersections in Nagpur, Maharashtra
+const NAGPUR_NODES = {
+    N0: { lat: 21.1458, lng: 79.0882 }, // Zero Mile Stone
+    N1: { lat: 21.1498, lng: 79.0806 }, // Sitabuldi Fort area
+    N2: { lat: 21.1385, lng: 79.0833 }, // Dhantoli
+    N3: { lat: 21.1311, lng: 79.0900 }, // Medical Square
+    N4: { lat: 21.1250, lng: 79.0750 }, // Congress Nagar
+    N5: { lat: 21.1350, lng: 79.0600 }, // Dharampeth
+    N6: { lat: 21.1450, lng: 79.0650 }, // Ramdaspeth
+    N7: { lat: 21.1550, lng: 79.0750 }, // Civil Lines
+    N8: { lat: 21.1600, lng: 79.0850 }, // Sadar
+    N9: { lat: 21.1500, lng: 79.1000 }  // Mahal
+};
+
+// Custom Marker Creator (DivIcon)
+const createMarkerIcon = (status) => {
+    let color = '#00f3ff'; // neon-cyan
+    let shadowColor = 'rgba(0, 243, 255, 0.6)';
+    let animateClass = '';
+
+    if (status === 'critical') {
+        color = '#ff3333';
+        shadowColor = 'rgba(255, 51, 51, 0.8)';
+        animateClass = 'animate-ping';
+    } else if (status === 'warning') {
+        color = '#facc15';
+        shadowColor = 'rgba(250, 204, 21, 0.6)';
+        animateClass = 'animate-pulse';
+    }
+
+    return L.divIcon({
+        className: 'custom-leaflet-marker',
+        html: `
+      <div class="relative flex items-center justify-center">
+        <div class="absolute w-6 h-6 rounded-full bg-[${color}] opacity-40 ${animateClass}"></div>
+        <div class="relative w-3 h-3 rounded-full border border-white/20 shadow-lg" 
+             style="background-color: ${color}; box-shadow: 0 0 10px ${shadowColor}"></div>
+      </div>
+    `,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+    });
+};
+
+const CityMapWidget = () => {
+    const { nodes } = useStore((state) => state.networkData);
+
+    const mappedNodes = useMemo(() => {
+        if (!nodes?.length) return [];
+        return nodes.map(node => ({
+            ...node,
+            lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
+            lng: NAGPUR_NODES[node.id]?.lng || 79.0882
+        }));
+    }, [nodes]);
+
+    return (
+        <div className="w-full h-full relative z-0">
+            <MapContainer
+                center={[21.1458, 79.0882]}
+                zoom={14}
+                style={{ height: '100%', width: '100%', background: '#101922' }}
+                zoomControl={false}
+            >
+                {/* Dark Themed Tile Layer from CartoDB */}
+                <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                />
+
+                {mappedNodes.map((node) => (
+                    <Marker
+                        key={node.id}
+                        position={[node.lat, node.lng]}
+                        icon={createMarkerIcon(node.status)}
+                    >
+                        <Popup className="custom-popup">
+                            <div className="p-1 font-sans">
+                                <h3 className="font-bold text-slate-800">Node: {node.id}</h3>
+                                <p className="text-xs text-slate-600">Status: <span className="uppercase font-mono">{node.status}</span></p>
+                                <p className="text-xs text-slate-600">Health: {node.integrity_score}%</p>
+                            </div>
+                        </Popup>
+                    </Marker>
+                ))}
+            </MapContainer>
+
+            {/* Map Overlay Logic */}
+            <div className="absolute top-4 right-4 z-[1000] pointer-events-auto">
+                <div className="glass-panel px-3 py-1.5 flex items-center gap-2 border border-white/10 shadow-lg">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Live Satellite Relay</span>
+                </div>
+            </div>
+
+            {/* Legend */}
+            <div className="absolute bottom-4 left-4 z-[1000] glass-panel p-3 text-xs bg-black/60 pointer-events-none border border-white/10">
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="h-2 w-2 bg-neon-cyan rounded-full"></div>
+                    <span className="text-slate-300 font-medium">Healthy Node</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                    <div className="h-2 w-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-slate-300 font-medium">Anomaly Detected</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 bg-red-500 rounded-full shadow-[0_0_5px_red]"></div>
+                    <span className="text-red-400 font-bold tracking-widest uppercase">Critical Leak</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default CityMapWidget;
