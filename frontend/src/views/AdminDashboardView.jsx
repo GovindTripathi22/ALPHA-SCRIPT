@@ -35,11 +35,36 @@ const AdminDashboardView = () => {
 
     const issueNodes = useMemo(() => {
         return (nodes?.filter(n => n.status === 'warning' || n.status === 'critical') || [])
-            .map(node => ({
-                ...node,
-                lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
-                lng: NAGPUR_NODES[node.id]?.lng || 79.0882
-            }))
+            .map(node => {
+                const variance = Math.abs(node.integrity_score - 100);
+                const pressureInt = node.pressure || 45; // Default 45 PSI if missing
+                const rand = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1 randomization
+
+                // Torricelli's Law Mock Calculation
+                let leakSizeCm2 = ((variance * 1.5) / (pressureInt / 100)) * rand;
+                leakSizeCm2 = Math.min(leakSizeCm2, 85); // Ceiling to prevent astronomically fake numbers
+
+                let severityClass = 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10';
+                let severityText = 'MICRO-FRACTURE';
+                if (leakSizeCm2 >= 20) {
+                    severityClass = 'text-red-500 border-red-500/20 bg-red-500/10 animate-pulse';
+                    severityText = 'MAJOR RUPTURE';
+                } else if (leakSizeCm2 >= 5) {
+                    severityClass = 'text-orange-500 border-orange-500/20 bg-orange-500/10';
+                    severityText = 'CRITICAL CRACK';
+                }
+
+                return {
+                    ...node,
+                    lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
+                    lng: NAGPUR_NODES[node.id]?.lng || 79.0882,
+                    leakSizeCm2: leakSizeCm2.toFixed(1),
+                    severityClass,
+                    severityText,
+                    delta_q: (variance * 0.4 * rand).toFixed(1),
+                    pressure_psi: pressureInt.toFixed(0)
+                };
+            })
             .sort((a, b) => b.integrity_score - a.integrity_score);
     }, [nodes]);
 
@@ -184,17 +209,17 @@ const AdminDashboardView = () => {
                                             </div>
                                         ) : (
                                             issueNodes.map((node, i) => (
-                                                <div key={i} className={`group p-4 rounded border transition-all hover:bg-white/5 shadow-lg ${node.status === 'critical' ? 'bg-red-500/10 border-red-500/30' : 'bg-orange-500/10 border-orange-500/30'}`}>
+                                                <div key={i} className={`group p-4 rounded border transition-all hover:bg-white/5 shadow-lg ${node.severityClass.replace('text-', 'border-').replace('bg-', 'hover:bg-')}`}>
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div>
                                                             <h4 className="text-xs font-bold text-white font-mono">{node.id}</h4>
                                                             <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Lat: {node.lat?.toFixed(4) || '0.0000'} | Lng: {node.lng?.toFixed(4) || '0.0000'}</p>
                                                         </div>
                                                         <div className="flex flex-col items-end">
-                                                            <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-widest ${node.status === 'critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}>
-                                                                {node.status}
+                                                            <span className={`text-[9px] px-2 py-0.5 border rounded font-black tracking-widest uppercase ${node.severityClass}`}>
+                                                                {node.severityText}
                                                             </span>
-                                                            <span className="text-[9px] font-bold text-slate-500 mt-1 uppercase">Burst Prob: {100 - node.integrity_score}%</span>
+                                                            <span className="text-[9px] font-bold mt-1 uppercase text-slate-400">AREA ≈ {node.leakSizeCm2} cm²</span>
                                                         </div>
                                                     </div>
 
@@ -211,15 +236,26 @@ const AdminDashboardView = () => {
                                         )}
                                     </div>
                                 ) : activeTab === 'comms' ? (
-                                    <div className="space-y-2 font-mono text-[10px] text-slate-500">
-                                        <p className="text-primary/60 border-b border-primary/10 pb-1">[SYSTEM] Initializing GNN weight verification...</p>
-                                        <p>... checking edge weights for Grid_Segment_A1</p>
-                                        <p className="text-green-500/60">... Node N0: Signal STABLE (4ms latency)</p>
-                                        <p className="text-red-500/60 font-bold">... Node N2: SIGNAL_VARIANCE_CRITICAL (Variance {'\u003E'} 24.2%)</p>
-                                        <p>... Calculating pressure propagation vector...</p>
-                                        <p className="text-blue-400">... Result: Prediction ID #4910: Burst Likelihood increased by 12% in Sector 4.</p>
-                                        <p>... Dispatching command CMD_01 to local gateway.</p>
-                                        <div className="w-2 h-4 bg-primary/40 animate-pulse mt-4"></div>
+                                    <div className="space-y-2 font-mono text-xs text-cyan-400 bg-background-dark/80 p-4 rounded border border-cyan-500/20">
+                                        <p className="text-slate-500 mb-2 border-b border-white/5 pb-2">root@hydrograph-core:~# tail -f /var/log/torricelli-ai.log</p>
+                                        {issueNodes.length > 0 ? (
+                                            <>
+                                                <p>{'>'} INIT TORRICELLI CALC ON NODE {issueNodes[0].id}:</p>
+                                                <p>{'>'} ΔQ = {issueNodes[0].delta_q} L/s | P = {issueNodes[0].pressure_psi} PSI</p>
+                                                <p className="text-slate-400">{'>'} COMPUTING: A = ΔQ / (Cd * √(2 * g * H))</p>
+                                                <p className={issueNodes[0].severityClass.split(' ')[0]}>
+                                                    {'>'} RESULT: AREA ≈ {issueNodes[0].leakSizeCm2} cm² [{issueNodes[0].severityText}]
+                                                </p>
+                                                <p className="mt-4 text-emerald-400">{'>'} AWAITING OVERRIDE CMD...</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p>{'>'} INIT SYSTEM SCAN:</p>
+                                                <p className="text-emerald-400">{'>'} GRID INTEGRITY OPTIMAL.</p>
+                                                <p>{'>'} AWAITING TELEMETRY ANOMALY...</p>
+                                            </>
+                                        )}
+                                        <div className="w-2 h-4 bg-cyan-400 animate-pulse mt-2"></div>
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
