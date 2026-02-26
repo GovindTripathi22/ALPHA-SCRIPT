@@ -1,0 +1,28 @@
+# HydroGraph AI Development Walkthrough
+
+## Phase 5: System Health & Maintenance
+
+**Changes Made:**
+*   Added a **System Health** tab to the [AdminDashboardView](file:///d:/alpha-script/frontend/src/views/AdminDashboardView.jsx#32-330) Intel Panel.
+*   Implemented a physical pipe age simulation (`pipeAgeYears`).
+*   Added Critical alerts for infrastructure older than 12 years (simulated material fatigue).
+*   Added a functional "SCHEDULE REPAIR" button that visually mitigates the immediate crisis threat.
+*   Updated CSS and Lucide icons to support the new UI elements (`ActivitySquare`, `AlertCircle`).
+
+## Phase 6: Hole Size Prediction (Torricelli's Law)
+
+**Changes Made:**
+*   Implemented a mock physics calculation based on **Torricelli's Law** to estimate the physical severity of a pipe leak.
+*   Introduced Severity classifications and color-coded UI: `< 5cm²` (Micro-fracture), `5cm² - 20cm²` (Critical Crack), and `> 20cm²` (Major Rupture).
+*   **UI/UX Overhaul for Pitch Visibility:** The Torricelli Mathematics Terminal was stripped out of the tabbed interface and elevated to its own massive, permanent [DesktopWindow](file:///d:/alpha-script/frontend/src/components/DesktopWindow.jsx#3-24) inside the Admin Panel. It now sits permanently visible on the bottom-right of the screen alongside the Threat Matrix, ensuring judges can constantly see the raw fluid dynamics mathematics being calculated in real-time.
+*   Fixed a critical re-render bug in the **System Telemetry Chart**, refactoring it to pre-fill 20 data points of historical state, enabling the live sensor scatter plot to smoothly scroll instead of jumping chaotically.
+*   **Added "Trigger Torricelli Pipe Leak" Button:** A prominent red button has been added directly to the main [DashboardView](file:///d:/alpha-script/frontend/src/views/DashboardView.jsx#10-90) Action Bar. Clicking this explicitly hits a new `/api/trigger-anomaly` backend endpoint, instantly mapping a massive leak and feeding raw calculation data into the Torricelli Physics Engine for a seamless live demonstration.
+
+**What Was Tested:**
+*   Verified the logic constraints dynamically mapping the anomaly score and simulated pressure to a realistic area in `cm²`.
+*   Verified the rendering layout of the new permanent Torricelli Terminal widget on Desktop dimensions.
+*   Triggered the anomaly via REST API POST request to ensure the event streams instantly through the SSE pipeline and updates the Torricelli React state.
+
+**Validation Results:**
+*   **SUCCESS:** The UI beautifully calculates and displays leak severities mathematically derived from node data.
+*   The raw terminal simulator beautifully outputs the fluid dynamics formula mapping `A = ΔQ / (Cd * √(2 * g * H))` to the exact `cm²` on the screen.

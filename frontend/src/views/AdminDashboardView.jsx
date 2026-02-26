@@ -15,6 +15,7 @@ import {
 import useStore from '../lib/store';
 import DesktopWindow from '../components/DesktopWindow';
 import AdminMapWidget from '../components/AdminMapWidget';
+import PipeModelViewer from '../components/PipeModelViewer';
 
 const NAGPUR_NODES = {
     N0: { lat: 21.1458, lng: 79.0882 },
@@ -32,6 +33,7 @@ const NAGPUR_NODES = {
 const AdminDashboardView = () => {
     const { nodes } = useStore((state) => state.networkData);
     const [activeTab, setActiveTab] = useState('incidents');
+    const [expandedHealthNode, setExpandedHealthNode] = useState(null);
 
     const issueNodes = useMemo(() => {
         return (nodes?.filter(n => n.status === 'warning' || n.status === 'critical') || [])
@@ -70,13 +72,19 @@ const AdminDashboardView = () => {
 
     const healthNodes = useMemo(() => {
         // Simulate physical pipe age based on Node ID hash
+        const materials = ['DUCTILE IRON', 'PVC', 'ASBESTOS CEMENT'];
+
         return (nodes || []).map((node, i) => {
             const simulatedAge = 5 + (i * 3.4) % 15; // Range ~5 to 20 years
+            const matIndex = i % materials.length;
+            const material = materials[matIndex];
+
             return {
                 ...node,
                 pipeAgeYears: simulatedAge.toFixed(1),
                 needsRepair: simulatedAge > 12,
-                repairScheduled: false
+                repairScheduled: false,
+                materialType: material
             };
         }).sort((a, b) => b.pipeAgeYears - a.pipeAgeYears);
     }, [nodes]);
@@ -236,14 +244,18 @@ const AdminDashboardView = () => {
                                             <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest">Action Required: Infrastructure exceeding 12-year lifespan.</p>
                                         </div>
                                         {healthNodes.map((node, i) => (
-                                            <div key={i} className={`group p-4 rounded border transition-all hover:bg-white/5 shadow-lg ${node.needsRepair && !node.repairScheduled ? 'bg-red-500/5 border-red-500/30' : 'bg-white/5 border-white/10'}`}>
+                                            <div
+                                                key={i}
+                                                onClick={() => setExpandedHealthNode(expandedHealthNode === node.id ? null : node.id)}
+                                                className={`group p-4 rounded border transition-all cursor-pointer ${node.needsRepair && !node.repairScheduled ? 'bg-red-500/5 hover:bg-red-500/10 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-white/5 hover:bg-white/10 border-white/10'}`}
+                                            >
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
                                                         <h4 className="text-xs font-bold text-white font-mono flex items-center gap-2">
                                                             <ActivitySquare size={14} className={node.needsRepair && !node.repairScheduled ? 'text-red-500' : 'text-green-500'} />
                                                             {node.id} Physical Assessment
                                                         </h4>
-                                                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Material: DUCTILE IRON_200mm</p>
+                                                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter pt-1">Material: {node.materialType}</p>
                                                     </div>
                                                     <div className="flex flex-col items-end">
                                                         <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-widest ${node.needsRepair && !node.repairScheduled ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-700 text-slate-300'}`}>
@@ -255,20 +267,44 @@ const AdminDashboardView = () => {
                                                     </div>
                                                 </div>
 
-                                                {node.needsRepair && !node.repairScheduled && (
-                                                    <div className="mt-4 pt-3 border-t border-red-500/20">
-                                                        <p className="text-[10px] text-slate-400 mb-3 font-mono">WARNING: Structural failure probability 87.4% due to material fatigue.</p>
-                                                        <button
-                                                            className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-red-600/20"
-                                                            onClick={(e) => {
-                                                                const el = e.currentTarget;
-                                                                el.innerText = 'MAINTENANCE DISPATCHED (48H)';
-                                                                el.className = 'w-full py-2 bg-green-600 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-green-600/20 cursor-not-allowed';
-                                                                el.disabled = true;
-                                                            }}
-                                                        >
-                                                            SCHEDULE REPAIR FIELD TEAM
-                                                        </button>
+                                                {/* Expanded 3D View */}
+                                                {expandedHealthNode === node.id && (
+                                                    <div className="mt-4 pt-4 border-t border-white/10">
+                                                        <div className="h-48 w-full bg-black/50 rounded overflow-hidden border border-cyan-500/20 shadow-inner relative mb-4">
+                                                            <PipeModelViewer
+                                                                materialType={node.materialType}
+                                                                age={parseFloat(node.pipeAgeYears)}
+                                                                isLeaking={node.status === 'critical' || (node.needsRepair && !node.repairScheduled)}
+                                                            />
+                                                        </div>
+                                                        <div className="flex justify-between text-[10px] font-mono mb-2">
+                                                            <span className="text-slate-400">Degradation:</span>
+                                                            <span className="text-amber-400">{((node.pipeAgeYears / 20) * 100).toFixed(1)}%</span>
+                                                        </div>
+                                                        <div className="flex justify-between text-[10px] font-mono mb-4">
+                                                            <span className="text-slate-400">Corrosion Level:</span>
+                                                            <span className={node.pipeAgeYears > 12 ? 'text-red-400 font-bold' : 'text-green-400'}>
+                                                                {node.pipeAgeYears > 15 ? 'SEVERE PITTING' : node.pipeAgeYears > 10 ? 'MODERATE OXIDATION' : 'MINIMAL'}
+                                                            </span>
+                                                        </div>
+
+                                                        {node.needsRepair && !node.repairScheduled && (
+                                                            <div className="pt-3 border-t border-red-500/20">
+                                                                <p className="text-[10px] text-red-400/80 mb-3 font-mono">WARNING: Structural failure probability 87.4% due to material fatigue.</p>
+                                                                <button
+                                                                    className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-red-600/20"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation(); // Prevents collapse when clicking button
+                                                                        const el = e.currentTarget;
+                                                                        el.innerText = 'MAINTENANCE DISPATCHED (48H)';
+                                                                        el.className = 'w-full py-2 bg-green-600 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-green-600/20 cursor-not-allowed';
+                                                                        el.disabled = true;
+                                                                    }}
+                                                                >
+                                                                    SCHEDULE REPAIR FIELD TEAM
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
                                             </div>
