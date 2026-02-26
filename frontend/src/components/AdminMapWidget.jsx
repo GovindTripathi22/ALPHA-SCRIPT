@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, Circle } from 'react-leaflet';
+import React, { useMemo, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, Circle, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import useStore from '../lib/store';
 import 'leaflet/dist/leaflet.css';
@@ -40,6 +40,7 @@ const createAdminMarker = (status, nodeId) => {
 
 const AdminMapWidget = ({ showHeatmap = true }) => {
     const { nodes } = useStore((state) => state.networkData);
+    const [showEvacuation, setShowEvacuation] = useState(false);
 
     const processedNodes = useMemo(() => {
         if (!nodes?.length) return [];
@@ -110,6 +111,25 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
                         </Popup>
                     </Marker>
                 ))}
+
+                {/* Emergency Evacuation / Detour Routes */}
+                {showEvacuation && processedNodes.filter(n => n.status === 'critical').map(node => {
+                    const detourPath = [
+                        [node.lat + 0.006, node.lng - 0.006],
+                        [node.lat + 0.008, node.lng],
+                        [node.lat + 0.006, node.lng + 0.006],
+                        [node.lat - 0.006, node.lng + 0.006],
+                        [node.lat - 0.008, node.lng],
+                        [node.lat - 0.006, node.lng - 0.006],
+                    ];
+
+                    return (
+                        <React.Fragment key={`detour-${node.id}`}>
+                            <Circle center={[node.lat, node.lng]} radius={400} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.3, weight: 2, dashArray: '10, 10' }} />
+                            <Polyline positions={detourPath} pathOptions={{ color: '#00f3ff', weight: 5, dashArray: '5, 10', opacity: 0.9 }} />
+                        </React.Fragment>
+                    );
+                })}
             </MapContainer>
 
             <div className="absolute top-4 left-4 z-[1000] space-y-2">
@@ -123,6 +143,11 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
                         <label className="flex items-center gap-2 cursor-pointer">
                             <div className="w-3 h-3 rounded-full bg-orange-500/20 border border-orange-500"></div>
                             <span className="text-[10px] text-slate-600 font-bold uppercase">Stress Nodes</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer pt-3 mt-3 border-t border-slate-200">
+                            <input type="checkbox" className="sr-only peer" checked={showEvacuation} onChange={() => setShowEvacuation(!showEvacuation)} />
+                            <div className="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-500 relative"></div>
+                            <span className="text-[10px] text-cyan-600 font-bold uppercase">Alternate Routes</span>
                         </label>
                     </div>
                 </div>

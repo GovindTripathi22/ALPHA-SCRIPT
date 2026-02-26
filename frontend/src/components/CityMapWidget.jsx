@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import React, { useMemo, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import useStore from '../lib/store';
 import 'leaflet/dist/leaflet.css';
@@ -50,6 +50,7 @@ const createMarkerIcon = (status) => {
 
 const CityMapWidget = () => {
     const { nodes } = useStore((state) => state.networkData);
+    const [showEvacuation, setShowEvacuation] = useState(false);
 
     const mappedNodes = useMemo(() => {
         if (!nodes?.length) return [];
@@ -89,14 +90,49 @@ const CityMapWidget = () => {
                         </Popup>
                     </Marker>
                 ))}
+
+                {/* Emergency Evacuation / Detour Routes */}
+                {showEvacuation && mappedNodes.filter(n => n.status === 'critical').map(node => {
+                    // Generate a simple detour box around the critical node
+                    const detourPath = [
+                        [node.lat + 0.006, node.lng - 0.006],
+                        [node.lat + 0.008, node.lng],
+                        [node.lat + 0.006, node.lng + 0.006],
+                        [node.lat - 0.006, node.lng + 0.006],
+                        [node.lat - 0.008, node.lng],
+                        [node.lat - 0.006, node.lng - 0.006],
+                    ];
+
+                    return (
+                        <React.Fragment key={`evac-${node.id}`}>
+                            {/* Road Closed Danger Zone */}
+                            <Circle
+                                center={[node.lat, node.lng]}
+                                radius={400}
+                                pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.3, weight: 2, dashArray: '10, 10' }}
+                            />
+                            {/* Alternate Safe Route for Traffic */}
+                            <Polyline
+                                positions={detourPath}
+                                pathOptions={{ color: '#00f3ff', weight: 5, dashArray: '5, 10', opacity: 0.9 }}
+                            />
+                        </React.Fragment>
+                    );
+                })}
             </MapContainer>
 
             {/* Map Overlay Logic */}
-            <div className="absolute top-4 right-4 z-[1000] pointer-events-auto">
+            <div className="absolute top-4 right-4 z-[1000] pointer-events-auto flex flex-col gap-2 items-end">
                 <div className="glass-panel px-3 py-1.5 flex items-center gap-2 border border-white/10 shadow-lg">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                     <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400">Live Satellite Relay</span>
                 </div>
+                <button
+                    onClick={() => setShowEvacuation(!showEvacuation)}
+                    className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded shadow-lg transition-all ${showEvacuation ? 'bg-cyan-500 text-white shadow-cyan-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'}`}
+                >
+                    {showEvacuation ? 'Hide Safe Routes' : 'Show Alternate Routes'}
+                </button>
             </div>
 
             {/* Legend */}
