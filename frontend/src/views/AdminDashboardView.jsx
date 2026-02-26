@@ -184,12 +184,6 @@ const AdminDashboardView = () => {
                                     Threat Matrix
                                 </button>
                                 <button
-                                    onClick={() => setActiveTab('comms')}
-                                    className={`flex-1 py-3 text-[10px] uppercase font-black tracking-[0.2em] transition-all ${activeTab === 'comms' ? 'text-primary border-b border-primary bg-primary/5' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
-                                >
-                                    Telemetry Logs
-                                </button>
-                                <button
                                     onClick={() => setActiveTab('health')}
                                     className={`flex-1 py-3 text-[10px] uppercase font-black tracking-[0.2em] transition-all ${activeTab === 'health' ? 'text-green-500 border-b border-green-500 bg-green-500/5' : 'text-slate-500 hover:text-white hover:bg-white/5'}`}
                                 >
@@ -201,7 +195,7 @@ const AdminDashboardView = () => {
                                 {activeTab === 'incidents' ? (
                                     <div className="space-y-4">
                                         {issueNodes.length === 0 ? (
-                                            <div className="py-20 text-center">
+                                            <div className="py-10 text-center">
                                                 <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/20">
                                                     <ShieldCheck size={32} className="text-green-500/40" />
                                                 </div>
@@ -234,28 +228,6 @@ const AdminDashboardView = () => {
                                                 </div>
                                             ))
                                         )}
-                                    </div>
-                                ) : activeTab === 'comms' ? (
-                                    <div className="space-y-2 font-mono text-xs text-cyan-400 bg-background-dark/80 p-4 rounded border border-cyan-500/20">
-                                        <p className="text-slate-500 mb-2 border-b border-white/5 pb-2">root@hydrograph-core:~# tail -f /var/log/torricelli-ai.log</p>
-                                        {issueNodes.length > 0 ? (
-                                            <>
-                                                <p>{'>'} INIT TORRICELLI CALC ON NODE {issueNodes[0].id}:</p>
-                                                <p>{'>'} ΔQ = {issueNodes[0].delta_q} L/s | P = {issueNodes[0].pressure_psi} PSI</p>
-                                                <p className="text-slate-400">{'>'} COMPUTING: A = ΔQ / (Cd * √(2 * g * H))</p>
-                                                <p className={issueNodes[0].severityClass.split(' ')[0]}>
-                                                    {'>'} RESULT: AREA ≈ {issueNodes[0].leakSizeCm2} cm² [{issueNodes[0].severityText}]
-                                                </p>
-                                                <p className="mt-4 text-emerald-400">{'>'} AWAITING OVERRIDE CMD...</p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <p>{'>'} INIT SYSTEM SCAN:</p>
-                                                <p className="text-emerald-400">{'>'} GRID INTEGRITY OPTIMAL.</p>
-                                                <p>{'>'} AWAITING TELEMETRY ANOMALY...</p>
-                                            </>
-                                        )}
-                                        <div className="w-2 h-4 bg-cyan-400 animate-pulse mt-2"></div>
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
@@ -303,6 +275,50 @@ const AdminDashboardView = () => {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    </DesktopWindow>
+
+                    {/* Torricelli AI Hole Size Engine - Always Visible! */}
+                    <DesktopWindow
+                        title="Torricelli_Physics_Engine.exe"
+                        headerRight={<Terminal size={14} className="text-cyan-400 animate-pulse" />}
+                        flex={1}
+                        className="border-cyan-500/30 shadow-[0_0_20px_rgba(34,211,238,0.05)]"
+                    >
+                        <div className="flex-1 overflow-y-auto custom-scrollbar bg-black/80 p-5 font-mono">
+                            <h3 className="text-cyan-400 text-sm font-bold border-b border-cyan-500/20 pb-2 mb-4">root@hydrograph-core:~# process_torricelli_telemetry --live</h3>
+                            <div className="space-y-3 text-xs">
+                                {issueNodes.length > 0 ? (
+                                    <>
+                                        <p className="text-slate-300">{'>'} EXECUTING TARGET NODE ANALYSIS: <span className="text-yellow-400">[{issueNodes[0].id}]</span></p>
+                                        <div className="pl-4 border-l-2 border-slate-700/50 space-y-2 py-2">
+                                            <p className="text-slate-400">├─ Live Variance (ΔQ): <span className="text-white">{issueNodes[0].delta_q} L/s</span></p>
+                                            <p className="text-slate-400">├─ Ambient Pressure (P): <span className="text-white">{issueNodes[0].pressure_psi} PSI</span></p>
+                                            <p className="text-slate-400">├─ Discharge Coefficient (Cd): <span className="text-white">0.62</span></p>
+                                            <p className="text-slate-500">└─ Gravity Constant (g): 9.81 m/s²</p>
+                                        </div>
+                                        <p className="text-cyan-500 font-bold mt-4">{'>'} COMPUTING: A = ΔQ / (Cd * √(2 * g * H))</p>
+
+                                        <div className={`mt-4 p-4 border rounded bg-background/50 flex flex-col items-center justify-center ${issueNodes[0].severityClass.replace('text-', 'border-')}`}>
+                                            <div className="text-[10px] text-slate-500 tracking-widest uppercase mb-1">Estimated Breach Area</div>
+                                            <div className={`text-4xl font-black ${issueNodes[0].severityClass.split(' ')[0]}`}>
+                                                {issueNodes[0].leakSizeCm2} <span className="text-lg">cm²</span>
+                                            </div>
+                                            <div className={`text-xs mt-2 font-bold uppercase tracking-widest ${issueNodes[0].severityClass.split(' ')[0]}`}>
+                                                [{issueNodes[0].severityText}]
+                                            </div>
+                                        </div>
+                                        <p className="mt-4 text-emerald-400 font-bold">{'>'} UPLOADING PREDICTION TO COMMAND GIS...</p>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-10 opacity-50">
+                                        <ActivitySquare size={48} className="text-cyan-500/20 mb-4" />
+                                        <p className="text-slate-500">{'>'} STANDBY FOR TELEMETRY ANOMALY...</p>
+                                        <p className="text-slate-600 mt-2">{'>'} Physics engine idling at 2% CPU</p>
+                                    </div>
+                                )}
+                                <div className="w-3 h-5 bg-cyan-400 animate-pulse mt-4"></div>
                             </div>
                         </div>
                     </DesktopWindow>

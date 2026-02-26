@@ -13,7 +13,24 @@ import useStore from '../lib/store';
 const SystemTelemetryChart = () => {
     const { nodes } = useStore((state) => state.networkData);
 
-    const [chartData, setChartData] = React.useState([]);
+    const [chartData, setChartData] = React.useState(() => {
+        const points = [];
+        let currentPressure = 45;
+        let currentFlow = 20;
+        const now = new Date();
+        for (let i = 20; i > 0; i--) {
+            const t = new Date(now.getTime() - i * 1000);
+            const timeStr = `${t.getHours().toString().padStart(2, '0')}:${t.getMinutes().toString().padStart(2, '0')}:${t.getSeconds().toString().padStart(2, '0')}`;
+            currentPressure += (Math.random() - 0.5) * 5;
+            currentFlow += (Math.random() - 0.5) * 2;
+            points.push({
+                time: timeStr,
+                pressure: Math.max(0, currentPressure),
+                flow: Math.max(0, currentFlow),
+            });
+        }
+        return points;
+    });
 
     React.useEffect(() => {
         if (!nodes || nodes.length === 0) return;
