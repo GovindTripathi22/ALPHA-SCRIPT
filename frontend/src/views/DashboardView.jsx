@@ -11,22 +11,31 @@ const DashboardView = () => {
     const { networkData, setNetworkData } = useStore();
 
     const triggerManualAnomaly = () => {
-        // Force the leak client-side immediately for guaranteed functionality
-        if (!networkData.nodes || networkData.nodes.length === 0) {
-            // If nodes aren't loaded yet, try a brief wait or just return
-            console.warn("No nodes found in store to trigger leak.");
-            return;
+        // Fallback nodes just in case the backend SSE hasn't loaded (common on Vercel)
+        let baseNodes = networkData.nodes || [];
+
+        if (baseNodes.length === 0) {
+            // Generate dummy nodes if the store is empty
+            for (let i = 0; i < 10; i++) {
+                baseNodes.push({
+                    id: `N${i}`,
+                    status: 'nominal',
+                    integrity_score: 98,
+                    pressure: 45,
+                    flow_rate: 20
+                });
+            }
         }
 
-        const updatedNodes = networkData.nodes.map((n, i) => {
+        const updatedNodes = baseNodes.map((n, i) => {
             // Force a massive leak on Node 1 (central Nagpur node)
             if (n.id === 'N1' || i === 1) {
                 return {
                     ...n,
                     status: 'critical',
                     integrity_score: 12,
-                    flow_rate: 84.2, // Simulated high flow
-                    pressure: 27.0   // Simulated low pressure
+                    flow_rate: 84.8, // Massive flow burst
+                    pressure: 24.5   // Massive pressure drop
                 };
             }
             return n;
@@ -38,7 +47,16 @@ const DashboardView = () => {
             systemState: 'ANOMALOUS'
         });
 
-        // Try the backend in background if it exists
+        // Trigger dummy dispatch report too so the Admin panel lists it
+        useStore.getState().setDispatchReport({
+            id: 'T-9092',
+            nodeId: 'N1',
+            severity: 'CRITICAL',
+            message: 'PHYSICAL BREACH DETECTED: TORRICELLI VARIANCE > 40%',
+            timestamp: new Date().toISOString()
+        });
+
+        // Try the backend in background if it exists (for local demo)
         fetch('http://localhost:5000/api/trigger-anomaly', { method: 'POST' }).catch(() => { });
     };
 
