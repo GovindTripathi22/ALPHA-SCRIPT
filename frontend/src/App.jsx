@@ -6,8 +6,8 @@ import DashboardView from './views/DashboardView';
 import AdminDashboardView from './views/AdminDashboardView';
 import PlatformView from './views/PlatformView';
 import HydrologyView from './views/HydrologyView';
-import DevelopersView from './views/DevelopersView';
-import SettingsView from './views/SettingsView';
+import ImpactAnalysisView from './views/ImpactAnalysisView';
+import SystemControlView from './views/SystemControlView';
 
 function App() {
     const setNetworkData = useStore((state) => state.setNetworkData);
@@ -60,8 +60,8 @@ function App() {
                             <Route path="/" element={<DashboardView />} />
                             <Route path="/platform" element={<PlatformView />} />
                             <Route path="/hydrology" element={<HydrologyView />} />
-                            <Route path="/developers" element={<DevelopersView />} />
-                            <Route path="/settings" element={<SettingsView />} />
+                            <Route path="/impact" element={<ImpactAnalysisView />} />
+                            <Route path="/control" element={<SystemControlView />} />
                             <Route path="/admin" element={<AdminDashboardView />} />
                         </Routes>
                     </main>

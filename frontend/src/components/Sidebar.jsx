@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, Layers, Droplets, Terminal, Settings, LogIn, ShieldAlert } from 'lucide-react';
+import { Home, Layers, Droplets, PieChart, Sliders, LogIn, ShieldAlert } from 'lucide-react';
 
 const Sidebar = () => {
     const getNavClass = ({ isActive }) =>
@@ -46,13 +46,13 @@ const Sidebar = () => {
                             <Droplets size={20} />
                             <span className="text-sm font-medium">Hydrology</span>
                         </NavLink>
-                        <NavLink to="/developers" className={getNavClass}>
-                            <Terminal size={20} />
-                            <span className="text-sm font-medium">Developers</span>
+                        <NavLink to="/impact" className={getNavClass}>
+                            <PieChart size={20} />
+                            <span className="text-sm font-medium">Impact Analysis</span>
                         </NavLink>
-                        <NavLink to="/settings" className={getNavClass}>
-                            <Settings size={20} />
-                            <span className="text-sm font-medium">Settings</span>
+                        <NavLink to="/control" className={getNavClass}>
+                            <Sliders size={20} />
+                            <span className="text-sm font-medium">System Control</span>
                         </NavLink>
 
                         <div className="h-px bg-white/10 my-2"></div>
