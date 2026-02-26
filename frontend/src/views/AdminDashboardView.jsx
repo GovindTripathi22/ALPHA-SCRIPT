@@ -15,12 +15,30 @@ import useStore from '../lib/store';
 import DesktopWindow from '../components/DesktopWindow';
 import AdminMapWidget from '../components/AdminMapWidget';
 
+const NAGPUR_NODES = {
+    N0: { lat: 21.1458, lng: 79.0882 },
+    N1: { lat: 21.1498, lng: 79.0806 },
+    N2: { lat: 21.1385, lng: 79.0833 },
+    N3: { lat: 21.1311, lng: 79.0900 },
+    N4: { lat: 21.1250, lng: 79.0750 },
+    N5: { lat: 21.1350, lng: 79.0600 },
+    N6: { lat: 21.1450, lng: 79.0650 },
+    N7: { lat: 21.1550, lng: 79.0750 },
+    N8: { lat: 21.1600, lng: 79.0850 },
+    N9: { lat: 21.1500, lng: 79.1000 }
+};
+
 const AdminDashboardView = () => {
     const { nodes } = useStore((state) => state.networkData);
     const [activeTab, setActiveTab] = useState('incidents');
 
     const issueNodes = useMemo(() => {
         return (nodes?.filter(n => n.status === 'warning' || n.status === 'critical') || [])
+            .map(node => ({
+                ...node,
+                lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
+                lng: NAGPUR_NODES[node.id]?.lng || 79.0882
+            }))
             .sort((a, b) => b.integrity_score - a.integrity_score);
     }, [nodes]);
 
@@ -150,7 +168,7 @@ const AdminDashboardView = () => {
                                                     <div className="flex justify-between items-start mb-3">
                                                         <div>
                                                             <h4 className="text-xs font-bold text-white font-mono">{node.id}</h4>
-                                                            <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Lat: {node.lat.toFixed(4)} | Lng: {node.lng.toFixed(4)}</p>
+                                                            <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Lat: {node.lat?.toFixed(4) || '0.0000'} | Lng: {node.lng?.toFixed(4) || '0.0000'}</p>
                                                         </div>
                                                         <div className="flex flex-col items-end">
                                                             <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-widest ${node.status === 'critical' ? 'bg-red-500 text-white' : 'bg-orange-500 text-white'}`}>
@@ -177,7 +195,7 @@ const AdminDashboardView = () => {
                                         <p className="text-primary/60 border-b border-primary/10 pb-1">[SYSTEM] Initializing GNN weight verification...</p>
                                         <p>... checking edge weights for Grid_Segment_A1</p>
                                         <p className="text-green-500/60">... Node N0: Signal STABLE (4ms latency)</p>
-                                        <p className="text-red-500/60 font-bold">... Node N2: SIGNAL_VARIANCE_CRITICAL (Variance > 24.2%)</p>
+                                        <p className="text-red-500/60 font-bold">... Node N2: SIGNAL_VARIANCE_CRITICAL (Variance {'\u003E'} 24.2%)</p>
                                         <p>... Calculating pressure propagation vector...</p>
                                         <p className="text-blue-400">... Result: Prediction ID #4910: Burst Likelihood increased by 12% in Sector 4.</p>
                                         <p>... Dispatching command CMD_01 to local gateway.</p>
