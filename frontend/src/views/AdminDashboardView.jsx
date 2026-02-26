@@ -17,17 +17,17 @@ import DesktopWindow from '../components/DesktopWindow';
 import AdminMapWidget from '../components/AdminMapWidget';
 import PipeModelViewer from '../components/PipeModelViewer';
 
-const NAGPUR_NODES = {
-    N0: { lat: 21.1458, lng: 79.0882 },
-    N1: { lat: 21.1498, lng: 79.0806 },
-    N2: { lat: 21.1385, lng: 79.0833 },
-    N3: { lat: 21.1311, lng: 79.0900 },
-    N4: { lat: 21.1250, lng: 79.0750 },
-    N5: { lat: 21.1350, lng: 79.0600 },
-    N6: { lat: 21.1450, lng: 79.0650 },
-    N7: { lat: 21.1550, lng: 79.0750 },
-    N8: { lat: 21.1600, lng: 79.0850 },
-    N9: { lat: 21.1500, lng: 79.1000 }
+const AMRAVATI_NODES = {
+    N0: { lat: 20.9320, lng: 77.7523 }, // Amravati Central
+    N1: { lat: 20.9400, lng: 77.7400 },
+    N2: { lat: 20.9250, lng: 77.7600 },
+    N3: { lat: 20.9150, lng: 77.7650 },
+    N4: { lat: 20.9500, lng: 77.7450 },
+    N5: { lat: 20.9350, lng: 77.7300 },
+    N6: { lat: 20.9200, lng: 77.7400 },
+    N7: { lat: 20.9450, lng: 77.7600 },
+    N8: { lat: 20.9100, lng: 77.7500 },
+    N9: { lat: 20.9550, lng: 77.7350 }
 };
 
 const AdminDashboardView = () => {
@@ -58,8 +58,8 @@ const AdminDashboardView = () => {
 
                 return {
                     ...node,
-                    lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
-                    lng: NAGPUR_NODES[node.id]?.lng || 79.0882,
+                    lat: AMRAVATI_NODES[node.id]?.lat || 20.9320,
+                    lng: AMRAVATI_NODES[node.id]?.lng || 77.7523,
                     leakSizeCm2: leakSizeCm2.toFixed(1),
                     severityClass,
                     severityText,
@@ -251,11 +251,11 @@ const AdminDashboardView = () => {
                                             >
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div>
-                                                        <h4 className="text-xs font-bold text-white font-mono flex items-center gap-2">
-                                                            <ActivitySquare size={14} className={node.needsRepair && !node.repairScheduled ? 'text-red-500' : 'text-green-500'} />
+                                                        <h4 className="text-sm font-bold text-white font-mono flex items-center gap-2">
+                                                            <ActivitySquare size={16} className={node.needsRepair && !node.repairScheduled ? 'text-red-500' : 'text-green-500'} />
                                                             {node.id} Physical Assessment
                                                         </h4>
-                                                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter pt-1">Material: {node.materialType}</p>
+                                                        <p className="text-xs text-slate-400 uppercase tracking-tighter pt-1 font-bold">Material: <span className="text-cyan-400">{node.materialType}</span></p>
                                                     </div>
                                                     <div className="flex flex-col items-end">
                                                         <span className={`text-[9px] px-2 py-0.5 rounded font-black tracking-widest ${node.needsRepair && !node.repairScheduled ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-700 text-slate-300'}`}>
@@ -270,20 +270,20 @@ const AdminDashboardView = () => {
                                                 {/* Expanded 3D View */}
                                                 {expandedHealthNode === node.id && (
                                                     <div className="mt-4 pt-4 border-t border-white/10">
-                                                        <div className="h-48 w-full bg-black/50 rounded overflow-hidden border border-cyan-500/20 shadow-inner relative mb-4">
+                                                        <div className="h-96 w-full bg-black/50 rounded overflow-hidden border border-cyan-500/20 shadow-inner relative mb-4">
                                                             <PipeModelViewer
                                                                 materialType={node.materialType}
                                                                 age={parseFloat(node.pipeAgeYears)}
                                                                 isLeaking={node.status === 'critical' || (node.needsRepair && !node.repairScheduled)}
                                                             />
                                                         </div>
-                                                        <div className="flex justify-between text-[10px] font-mono mb-2">
+                                                        <div className="flex justify-between text-sm font-mono mb-2">
                                                             <span className="text-slate-400">Degradation:</span>
-                                                            <span className="text-amber-400">{((node.pipeAgeYears / 20) * 100).toFixed(1)}%</span>
+                                                            <span className="text-amber-400 font-bold">{((node.pipeAgeYears / 20) * 100).toFixed(1)}%</span>
                                                         </div>
-                                                        <div className="flex justify-between text-[10px] font-mono mb-4">
+                                                        <div className="flex justify-between text-sm font-mono mb-4">
                                                             <span className="text-slate-400">Corrosion Level:</span>
-                                                            <span className={node.pipeAgeYears > 12 ? 'text-red-400 font-bold' : 'text-green-400'}>
+                                                            <span className={node.pipeAgeYears > 12 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
                                                                 {node.pipeAgeYears > 15 ? 'SEVERE PITTING' : node.pipeAgeYears > 10 ? 'MODERATE OXIDATION' : 'MINIMAL'}
                                                             </span>
                                                         </div>

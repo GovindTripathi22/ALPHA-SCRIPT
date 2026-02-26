@@ -103,7 +103,7 @@ const PlatformView = () => {
                                                 0{i}
                                             </div>
                                             <div>
-                                                <h4 className="text-[11px] font-bold text-white tracking-tight">NAGPUR_SEC_{102 + i}</h4>
+                                                <h4 className="text-[11px] font-bold text-white tracking-tight">AMRAVATI_SEC_{102 + i}</h4>
                                                 <p className="text-[9px] text-slate-500">Uptime: 402h 12m</p>
                                             </div>
                                         </div>

@@ -94,7 +94,7 @@ const DashboardView = () => {
 
                 {/* Geospatial Window */}
                 <DesktopWindow
-                    title="City_Grid_Nagpur.map"
+                    title="City_Grid_Amravati.map"
                     headerRight={
                         <div className="flex items-center gap-1 text-primary">
                             <Globe size={12} /> SYNCED

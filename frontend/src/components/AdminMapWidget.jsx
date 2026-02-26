@@ -4,17 +4,17 @@ import L from 'leaflet';
 import useStore from '../lib/store';
 import 'leaflet/dist/leaflet.css';
 
-const NAGPUR_NODES = {
-    N0: { lat: 21.1458, lng: 79.0882 },
-    N1: { lat: 21.1498, lng: 79.0806 },
-    N2: { lat: 21.1385, lng: 79.0833 },
-    N3: { lat: 21.1311, lng: 79.0900 },
-    N4: { lat: 21.1250, lng: 79.0750 },
-    N5: { lat: 21.1350, lng: 79.0600 },
-    N6: { lat: 21.1450, lng: 79.0650 },
-    N7: { lat: 21.1550, lng: 79.0750 },
-    N8: { lat: 21.1600, lng: 79.0850 },
-    N9: { lat: 21.1500, lng: 79.1000 }
+const AMRAVATI_NODES = {
+    N0: { lat: 20.9320, lng: 77.7523 }, // Amravati Central
+    N1: { lat: 20.9400, lng: 77.7400 },
+    N2: { lat: 20.9250, lng: 77.7600 },
+    N3: { lat: 20.9150, lng: 77.7650 },
+    N4: { lat: 20.9500, lng: 77.7450 },
+    N5: { lat: 20.9350, lng: 77.7300 },
+    N6: { lat: 20.9200, lng: 77.7400 },
+    N7: { lat: 20.9450, lng: 77.7600 },
+    N8: { lat: 20.9100, lng: 77.7500 },
+    N9: { lat: 20.9550, lng: 77.7350 }
 };
 
 const createAdminMarker = (status, nodeId) => {
@@ -45,8 +45,8 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
         if (!nodes?.length) return [];
         return nodes.map(node => ({
             ...node,
-            lat: NAGPUR_NODES[node.id]?.lat || 21.1458,
-            lng: NAGPUR_NODES[node.id]?.lng || 79.0882,
+            lat: AMRAVATI_NODES[node.id]?.lat || 20.9320,
+            lng: AMRAVATI_NODES[node.id]?.lng || 77.7523,
             // Simulate "Risk Score" for the heatmap
             riskScore: node.status === 'critical' ? 100 : node.status === 'warning' ? 60 : Math.random() * 30
         }));
@@ -55,7 +55,7 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
     return (
         <div className="w-full h-full relative z-0">
             <MapContainer
-                center={[21.1458, 79.0882]}
+                center={[20.9320, 77.7523]}
                 zoom={14}
                 style={{ height: '100%', width: '100%', background: '#F8FAFC' }}
                 zoomControl={false}
