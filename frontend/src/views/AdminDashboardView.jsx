@@ -17,17 +17,17 @@ import DesktopWindow from '../components/DesktopWindow';
 import AdminMapWidget from '../components/AdminMapWidget';
 import PipeModelViewer from '../components/PipeModelViewer';
 
-const AMRAVATI_NODES = {
-    N0: { lat: 20.9320, lng: 77.7523 }, // Amravati Central
-    N1: { lat: 20.9400, lng: 77.7400 },
-    N2: { lat: 20.9250, lng: 77.7600 },
-    N3: { lat: 20.9150, lng: 77.7650 },
-    N4: { lat: 20.9500, lng: 77.7450 },
-    N5: { lat: 20.9350, lng: 77.7300 },
-    N6: { lat: 20.9200, lng: 77.7400 },
-    N7: { lat: 20.9450, lng: 77.7600 },
-    N8: { lat: 20.9100, lng: 77.7500 },
-    N9: { lat: 20.9550, lng: 77.7350 }
+const INDIA_NODES = {
+    N0: { lat: 28.6139, lng: 77.2090 }, // Delhi
+    N1: { lat: 19.0760, lng: 72.8777 }, // Mumbai
+    N2: { lat: 12.9716, lng: 77.5946 }, // Bangalore
+    N3: { lat: 13.0827, lng: 80.2707 }, // Chennai
+    N4: { lat: 22.5726, lng: 88.3639 }, // Kolkata
+    N5: { lat: 17.3850, lng: 78.4867 }, // Hyderabad
+    N6: { lat: 23.0225, lng: 72.5714 }, // Ahmedabad
+    N7: { lat: 18.5204, lng: 73.8567 }, // Pune
+    N8: { lat: 26.9124, lng: 75.7873 }, // Jaipur
+    N9: { lat: 26.8467, lng: 80.9462 }  // Lucknow
 };
 
 const AdminDashboardView = () => {
@@ -43,8 +43,10 @@ const AdminDashboardView = () => {
                 const rand = 0.9 + (Math.random() * 0.2); // 0.9 to 1.1 randomization
 
                 // Torricelli's Law Mock Calculation
-                let leakSizeCm2 = ((variance * 1.5) / (pressureInt / 100)) * rand;
-                leakSizeCm2 = Math.min(leakSizeCm2, 85); // Ceiling to prevent astronomically fake numbers
+                const nodeNum = parseInt(node.id.replace('N', '')) || 0;
+                let leakSizeCm2 = node.status === 'critical'
+                    ? 35 + (nodeNum * 23) % 70 + (Math.random() * 5)
+                    : 5 + (nodeNum * 9) % 15 + (Math.random() * 2);
 
                 let severityClass = 'text-yellow-400 border-yellow-400/20 bg-yellow-400/10';
                 let severityText = 'MICRO-FRACTURE';
@@ -58,8 +60,8 @@ const AdminDashboardView = () => {
 
                 return {
                     ...node,
-                    lat: AMRAVATI_NODES[node.id]?.lat || 20.9320,
-                    lng: AMRAVATI_NODES[node.id]?.lng || 77.7523,
+                    lat: INDIA_NODES[node.id]?.lat || 22.5937,
+                    lng: INDIA_NODES[node.id]?.lng || 78.9629,
                     leakSizeCm2: leakSizeCm2.toFixed(1),
                     severityClass,
                     severityText,
@@ -226,10 +228,10 @@ const AdminDashboardView = () => {
                                                     </div>
 
                                                     <div className="flex gap-2">
-                                                        <button className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-[9px] font-black text-white rounded border border-white/5 transition-all">
+                                                        <button className="flex-1 py-2 text-[9px] font-black text-white rounded border border-white/5 btn-premium bg-white/5 hover:bg-white/10">
                                                             TRACK SENSOR
                                                         </button>
-                                                        <button className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white text-[9px] font-black rounded transition-all shadow-lg shadow-red-600/20">
+                                                        <button className="flex-1 py-2 text-[9px] rounded btn-danger-glow">
                                                             ISOLATE VALVE
                                                         </button>
                                                     </div>
@@ -292,12 +294,12 @@ const AdminDashboardView = () => {
                                                             <div className="pt-3 border-t border-red-500/20">
                                                                 <p className="text-[10px] text-red-400/80 mb-3 font-mono">WARNING: Structural failure probability 87.4% due to material fatigue.</p>
                                                                 <button
-                                                                    className="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-red-600/20"
+                                                                    className="w-full py-2 text-[9px] rounded btn-danger-glow"
                                                                     onClick={(e) => {
                                                                         e.stopPropagation(); // Prevents collapse when clicking button
                                                                         const el = e.currentTarget;
                                                                         el.innerText = 'MAINTENANCE DISPATCHED (48H)';
-                                                                        el.className = 'w-full py-2 bg-green-600 text-white text-[9px] font-black tracking-widest uppercase rounded transition-all shadow-lg shadow-green-600/20 cursor-not-allowed';
+                                                                        el.className = 'w-full py-2 text-[9px] rounded btn-premium bg-green-600/5 hover:bg-green-600/10 border-green-600/30 text-green-400 cursor-not-allowed';
                                                                         el.disabled = true;
                                                                     }}
                                                                 >

@@ -15,14 +15,13 @@ const ImpactAnalysisView = () => {
     const { nodes } = useStore((state) => state.networkData);
 
     const metrics = useMemo(() => {
-        if (!nodes?.length) return { savedWater: 0, savedMoney: 0, activeThreats: 0, efficiency: 98 };
-        const threats = nodes.filter(n => n.status !== 'healthy').length;
-        // Simulated values for Hackathon Impact Pitch
+        const threats = nodes?.filter(n => n.status !== 'healthy' && n.status !== 'nominal').length || 0;
+        // Simulated values for Hackathon Impact Pitch (always show impressive numbers)
         return {
-            savedWater: 14500 + Math.floor(Math.random() * 500), // Liters
-            savedMoney: 85000 + Math.floor(Math.random() * 5000), // INR
+            savedWater: 145000 + Math.floor(Math.random() * 5000), // Liters
+            savedMoney: 2850000 + Math.floor(Math.random() * 50000), // INR
             activeThreats: threats,
-            efficiency: threats > 5 ? 89 : 98
+            efficiency: threats > 5 ? 89.4 : 98.7
         };
     }, [nodes]);
 
@@ -121,7 +120,7 @@ const ImpactAnalysisView = () => {
                             </div>
                         </div>
 
-                        <button className="w-full py-3 bg-white/5 hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest border border-white/10 rounded transition-all">
+                        <button className="w-full py-3 text-white font-bold text-xs uppercase tracking-widest border border-white/10 rounded btn-premium bg-white/5 hover:bg-white/10">
                             Export Financial Audit Report
                         </button>
                     </div>

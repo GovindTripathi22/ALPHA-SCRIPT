@@ -53,10 +53,10 @@ const AgentPanel = () => {
                     </div>
 
                     <div className="mt-4 flex gap-2">
-                        <button className="flex-1 bg-white/10 hover:bg-white/20 active:bg-white/5 text-white py-2 rounded-lg text-xs font-semibold tracking-wider transition-colors">
-                            ACKNOWLEDGE
+                        <button className="flex-1 text-white py-2 rounded-lg text-xs font-semibold tracking-wider btn-premium bg-white/10 hover:bg-white/20">
+                            REJECT
                         </button>
-                        <button className="flex-1 bg-alert-red hover:bg-red-600 active:bg-red-700 text-white py-2 rounded-lg text-xs font-semibold tracking-wider transition-colors shadow-lg shadow-alert-red/20 flex items-center justify-center gap-2">
+                        <button className="flex-1 py-2 flex items-center justify-center gap-2 rounded-lg text-xs btn-danger-glow">
                             <Shield className="w-4 h-4" /> OVERRIDE AI
                         </button>
                     </div>

@@ -4,18 +4,17 @@ import L from 'leaflet';
 import useStore from '../lib/store';
 import 'leaflet/dist/leaflet.css';
 
-// Hardcoded coordinates for 10 intersections in Amravati, Maharashtra
-const AMRAVATI_NODES = {
-    N0: { lat: 20.9320, lng: 77.7523 }, // Amravati Central
-    N1: { lat: 20.9400, lng: 77.7400 },
-    N2: { lat: 20.9250, lng: 77.7600 },
-    N3: { lat: 20.9150, lng: 77.7650 },
-    N4: { lat: 20.9500, lng: 77.7450 },
-    N5: { lat: 20.9350, lng: 77.7300 },
-    N6: { lat: 20.9200, lng: 77.7400 },
-    N7: { lat: 20.9450, lng: 77.7600 },
-    N8: { lat: 20.9100, lng: 77.7500 },
-    N9: { lat: 20.9550, lng: 77.7350 }
+const INDIA_NODES = {
+    N0: { lat: 28.6139, lng: 77.2090 }, // Delhi
+    N1: { lat: 19.0760, lng: 72.8777 }, // Mumbai
+    N2: { lat: 12.9716, lng: 77.5946 }, // Bangalore
+    N3: { lat: 13.0827, lng: 80.2707 }, // Chennai
+    N4: { lat: 22.5726, lng: 88.3639 }, // Kolkata
+    N5: { lat: 17.3850, lng: 78.4867 }, // Hyderabad
+    N6: { lat: 23.0225, lng: 72.5714 }, // Ahmedabad
+    N7: { lat: 18.5204, lng: 73.8567 }, // Pune
+    N8: { lat: 26.9124, lng: 75.7873 }, // Jaipur
+    N9: { lat: 26.8467, lng: 80.9462 }  // Lucknow
 };
 
 // Custom Marker Creator (DivIcon)
@@ -56,16 +55,16 @@ const CityMapWidget = () => {
         if (!nodes?.length) return [];
         return nodes.map(node => ({
             ...node,
-            lat: AMRAVATI_NODES[node.id]?.lat || 20.9320,
-            lng: AMRAVATI_NODES[node.id]?.lng || 77.7523
+            lat: INDIA_NODES[node.id]?.lat || 22.5937,
+            lng: INDIA_NODES[node.id]?.lng || 78.9629
         }));
     }, [nodes]);
 
     return (
         <div className="w-full h-full relative z-0">
             <MapContainer
-                center={[20.9320, 77.7523]}
-                zoom={14}
+                center={[22.5937, 78.9629]}
+                zoom={5}
                 style={{ height: '100%', width: '100%', background: '#101922' }}
                 zoomControl={false}
             >
@@ -129,7 +128,7 @@ const CityMapWidget = () => {
                 </div>
                 <button
                     onClick={() => setShowEvacuation(!showEvacuation)}
-                    className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded shadow-lg transition-all ${showEvacuation ? 'bg-cyan-500 text-white shadow-cyan-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'}`}
+                    className={`px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded btn-premium ${showEvacuation ? 'bg-cyan-500 text-white shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'}`}
                 >
                     {showEvacuation ? 'Hide Safe Routes' : 'Show Alternate Routes'}
                 </button>

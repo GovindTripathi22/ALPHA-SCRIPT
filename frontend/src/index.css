@@ -35,6 +35,28 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-white/10 rounded-full hover:bg-white/20;
   }
+
+  .btn-premium {
+    @apply relative overflow-hidden transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-95;
+  }
+
+  .btn-primary-glow {
+    @apply relative overflow-hidden transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 bg-primary text-white font-bold tracking-widest uppercase hover:bg-primary/90;
+    box-shadow: 0 0 20px rgba(13, 127, 242, 0.3);
+  }
+
+  .btn-primary-glow:hover {
+    box-shadow: 0 0 30px rgba(13, 127, 242, 0.6);
+  }
+
+  .btn-danger-glow {
+    @apply relative overflow-hidden transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 active:scale-95 bg-red-600 text-white font-bold tracking-widest uppercase hover:bg-red-500;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.3);
+  }
+
+  .btn-danger-glow:hover {
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.6);
+  }
 }
 
 @keyframes fade-in-up {
@@ -59,12 +81,42 @@
   }
 }
 
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(13, 127, 242, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(13, 127, 242, 0.6);
+  }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-spin-slow {
   animation: spin-slow 12s linear infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes water-flow {
+  from {
+    stroke-dashoffset: 40;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-water-flow {
+  animation: water-flow 1s linear infinite;
 }
 
 /* Leaflet Overrides */

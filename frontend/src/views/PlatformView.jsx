@@ -20,10 +20,10 @@ const PlatformView = () => {
                     <p className="text-sm text-slate-400">Deep-analysis of virtual sensing nodes and GNN processing layers.</p>
                 </div>
                 <div className="flex gap-2">
-                    <button className="flex items-center gap-2 px-3 py-1.5 glass-panel text-xs text-white hover:bg-white/10 transition-colors">
+                    <button className="flex items-center gap-2 px-3 py-1.5 glass-panel text-xs text-white hover:bg-white/10 btn-premium">
                         <Search size={14} /> Search Node
                     </button>
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-primary text-white text-xs font-bold rounded shadow-lg shadow-primary/20 hover:bg-primary/80 transition-all">
+                    <button className="flex items-center gap-2 px-4 py-1.5 btn-primary-glow rounded">
                         <Plus size={14} /> Deploy Node
                     </button>
                 </div>

@@ -65,7 +65,7 @@ const Sidebar = () => {
                 </div>
 
                 <div className="mt-auto pt-6 border-t border-white/5">
-                    <button className="w-full flex items-center justify-center gap-2 h-10 px-4 bg-primary text-white text-sm font-bold tracking-wide rounded hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 cursor-pointer">
+                    <button className="w-full flex items-center justify-center gap-2 h-10 px-4 rounded btn-primary-glow cursor-pointer">
                         <span>Login</span>
                         <LogIn size={18} />
                     </button>

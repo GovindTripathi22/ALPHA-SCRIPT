@@ -142,7 +142,7 @@ const HydrologyView = () => {
                             <p className="text-[10px] text-slate-500 max-w-[200px] leading-relaxed mb-6">
                                 Based on current temp (32°C) and soil moisture, predicted demand will increase by <span className="text-primary font-bold">14%</span> in the next 12 hours.
                             </p>
-                            <button className="w-full py-2 bg-primary text-white text-[10px] font-black tracking-widest uppercase rounded shadow-lg shadow-primary/20">
+                            <button className="w-full py-2 text-[10px] rounded btn-primary-glow">
                                 Optimize Output
                             </button>
                         </div>

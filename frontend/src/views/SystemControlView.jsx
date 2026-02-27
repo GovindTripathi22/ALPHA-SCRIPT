@@ -92,7 +92,7 @@ const SystemControlView = () => {
                                 <Power size={14} /> Full System Dump
                             </h4>
                             <p className="text-[10px] text-slate-500 mb-4">Evacuate primary grid lines instantly. Emergency use only.</p>
-                            <button className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-widest shadow-[0_0_15px_rgba(220,38,38,0.4)] transition-all rounded">
+                            <button className="w-full py-3 text-xs rounded btn-danger-glow">
                                 TRIGGER FLUSH
                             </button>
                         </div>

@@ -4,17 +4,17 @@ import L from 'leaflet';
 import useStore from '../lib/store';
 import 'leaflet/dist/leaflet.css';
 
-const AMRAVATI_NODES = {
-    N0: { lat: 20.9320, lng: 77.7523 }, // Amravati Central
-    N1: { lat: 20.9400, lng: 77.7400 },
-    N2: { lat: 20.9250, lng: 77.7600 },
-    N3: { lat: 20.9150, lng: 77.7650 },
-    N4: { lat: 20.9500, lng: 77.7450 },
-    N5: { lat: 20.9350, lng: 77.7300 },
-    N6: { lat: 20.9200, lng: 77.7400 },
-    N7: { lat: 20.9450, lng: 77.7600 },
-    N8: { lat: 20.9100, lng: 77.7500 },
-    N9: { lat: 20.9550, lng: 77.7350 }
+const INDIA_NODES = {
+    N0: { lat: 28.6139, lng: 77.2090 }, // Delhi
+    N1: { lat: 19.0760, lng: 72.8777 }, // Mumbai
+    N2: { lat: 12.9716, lng: 77.5946 }, // Bangalore
+    N3: { lat: 13.0827, lng: 80.2707 }, // Chennai
+    N4: { lat: 22.5726, lng: 88.3639 }, // Kolkata
+    N5: { lat: 17.3850, lng: 78.4867 }, // Hyderabad
+    N6: { lat: 23.0225, lng: 72.5714 }, // Ahmedabad
+    N7: { lat: 18.5204, lng: 73.8567 }, // Pune
+    N8: { lat: 26.9124, lng: 75.7873 }, // Jaipur
+    N9: { lat: 26.8467, lng: 80.9462 }  // Lucknow
 };
 
 const createAdminMarker = (status, nodeId) => {
@@ -41,13 +41,14 @@ const createAdminMarker = (status, nodeId) => {
 const AdminMapWidget = ({ showHeatmap = true }) => {
     const { nodes } = useStore((state) => state.networkData);
     const [showEvacuation, setShowEvacuation] = useState(false);
+    const [dispatchedNodes, setDispatchedNodes] = useState([]);
 
     const processedNodes = useMemo(() => {
         if (!nodes?.length) return [];
         return nodes.map(node => ({
             ...node,
-            lat: AMRAVATI_NODES[node.id]?.lat || 20.9320,
-            lng: AMRAVATI_NODES[node.id]?.lng || 77.7523,
+            lat: INDIA_NODES[node.id]?.lat || 22.5937,
+            lng: INDIA_NODES[node.id]?.lng || 78.9629,
             // Simulate "Risk Score" for the heatmap
             riskScore: node.status === 'critical' ? 100 : node.status === 'warning' ? 60 : Math.random() * 30
         }));
@@ -56,8 +57,8 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
     return (
         <div className="w-full h-full relative z-0">
             <MapContainer
-                center={[20.9320, 77.7523]}
-                zoom={14}
+                center={[22.5937, 78.9629]}
+                zoom={5}
                 style={{ height: '100%', width: '100%', background: '#F8FAFC' }}
                 zoomControl={false}
             >
@@ -73,7 +74,7 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
                         <Circle
                             key={`risk-${node.id}`}
                             center={[node.lat, node.lng]}
-                            radius={200 + (node.riskScore * 2)}
+                            radius={10000 + (node.riskScore * 500)}
                             pathOptions={{
                                 fillColor: node.riskScore > 80 ? '#ef4444' : '#f59e0b',
                                 fillOpacity: 0.15,
@@ -104,8 +105,13 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
                                     <div className="flex justify-between text-[11px]"><span className="text-slate-500">Risk Factor:</span><span className="font-bold text-orange-600">{Math.round(node.riskScore)}%</span></div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <button className="py-2 bg-slate-900 text-white rounded text-[10px] font-bold">DISPATCH</button>
-                                    <button className="py-2 bg-white border border-slate-200 text-slate-600 rounded text-[10px] font-bold">ISOLATE</button>
+                                    <button
+                                        className={`py-2 text-white rounded text-[10px] font-bold btn-premium ${dispatchedNodes.includes(node.id) ? 'bg-cyan-600 shadow-[0_0_15px_rgba(34,211,238,0.5)]' : 'bg-slate-900'}`}
+                                        onClick={() => setDispatchedNodes(prev => prev.includes(node.id) ? prev.filter(id => id !== node.id) : [...prev, node.id])}
+                                    >
+                                        {dispatchedNodes.includes(node.id) ? 'REROUTING...' : 'DISPATCH'}
+                                    </button>
+                                    <button className="py-2 bg-white border border-slate-200 text-slate-600 rounded text-[10px] font-bold btn-premium">ISOLATE</button>
                                 </div>
                             </div>
                         </Popup>
@@ -115,20 +121,50 @@ const AdminMapWidget = ({ showHeatmap = true }) => {
                 {/* Emergency Evacuation / Detour Routes */}
                 {showEvacuation && processedNodes.filter(n => n.status === 'critical').map(node => {
                     const detourPath = [
-                        [node.lat + 0.006, node.lng - 0.006],
-                        [node.lat + 0.008, node.lng],
-                        [node.lat + 0.006, node.lng + 0.006],
-                        [node.lat - 0.006, node.lng + 0.006],
-                        [node.lat - 0.008, node.lng],
-                        [node.lat - 0.006, node.lng - 0.006],
+                        [node.lat + 0.5, node.lng - 0.5],
+                        [node.lat + 0.8, node.lng],
+                        [node.lat + 0.5, node.lng + 0.5],
+                        [node.lat - 0.5, node.lng + 0.5],
+                        [node.lat - 0.8, node.lng],
+                        [node.lat - 0.5, node.lng - 0.5],
                     ];
 
                     return (
                         <React.Fragment key={`detour-${node.id}`}>
-                            <Circle center={[node.lat, node.lng]} radius={400} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.3, weight: 2, dashArray: '10, 10' }} />
+                            <Circle center={[node.lat, node.lng]} radius={100000} pathOptions={{ color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.3, weight: 2, dashArray: '10, 10' }} />
                             <Polyline positions={detourPath} pathOptions={{ color: '#00f3ff', weight: 5, dashArray: '5, 10', opacity: 0.9 }} />
                         </React.Fragment>
                     );
+                })}
+
+                {/* Smart Dispatch Water Rerouting Visualization */}
+                {dispatchedNodes.map(nodeId => {
+                    const sourceNode = processedNodes.find(n => n.id === nodeId);
+                    const healthyNodes = processedNodes.filter(n => n.status === 'healthy').slice(0, 3); // Route to 3 closest/healthy
+
+                    if (!sourceNode || !healthyNodes.length) return null;
+
+                    return healthyNodes.map(targetNode => {
+                        const flowPath = [
+                            [sourceNode.lat, sourceNode.lng],
+                            [(sourceNode.lat + targetNode.lat) / 2 + 0.5, (sourceNode.lng + targetNode.lng) / 2 - 0.5], // Control point curve
+                            [targetNode.lat, targetNode.lng]
+                        ];
+
+                        return (
+                            <Polyline
+                                key={`flow-${sourceNode.id}-${targetNode.id}`}
+                                positions={flowPath}
+                                pathOptions={{
+                                    className: 'animate-water-flow',
+                                    color: '#3b82f6', // blue-500
+                                    weight: 4,
+                                    dashArray: '15, 15',
+                                    opacity: 0.8
+                                }}
+                            />
+                        );
+                    });
                 })}
             </MapContainer>
 
